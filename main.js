@@ -222,13 +222,14 @@ class ProxyGithubSettingTab extends PluginSettingTab {
         new Setting(this.containerEl)
             .setName("代理服务器")
             .setDesc(
-                `通过选择不同的服务器来切换代理，可以解决某些情况下，某个服务器无法访问的情况。当前代理服务器：${this.plugin.settings.server}`
+                `通过选择不同的服务器来切换代理，可以解决某些情况下，某个服务器无法访问的情况。当前代理服务器：`
             )
             //.setValue(this.plugin.settings.server) // <-- Add me!
             .addDropdown((dropDown) => {
                 dropDown.addOption(server, server);
                 // dynamic option when proMap changed.
-                Object.keys(proMap).filter(v => v !== server)
+                Object.keys(proMap)
+                    .filter((v) => v !== server)
                     .forEach((v) => dropDown.addOption(v, v));
                 dropDown.onChange(async (value) => {
                     this.plugin.settings.server = value;
@@ -243,7 +244,8 @@ let app = new apProxy();
 let apc = new apCapacitor();
 let ape = new apElectron();
 module.exports = class ProxyGithub extends Plugin {
-    onload() {
+    async onload() {
+        this.loadSettings();
         // new window.Notice("添加 ProxyGithub 代理访问社区插件！");
         this.addSettingTab(new ProxyGithubSettingTab(this.app, this));
         ape.regedit();
@@ -257,6 +259,7 @@ module.exports = class ProxyGithub extends Plugin {
             { server },
             await this.loadData()
         );
+        server = this.settings.server;
     }
     async saveSettings() {
         await this.saveData(this.settings);
